@@ -2,10 +2,10 @@ app = "grafana-alloy-poc"
 primary_region = "iad"
 
 [build]
-  image = "grafana/alloy:latest"
+  image = "grafana/alloy:v1.15.1"
 
 [processes]
-  app = "run --server.http.listen-addr=0.0.0.0:12345 /etc/alloy/config.alloy"
+  app = "sh -ec '[ -f /tmp/config.alloy ] || printf \"logging { level = \\\"info\\\" }\\n\" > /tmp/config.alloy; exec alloy run --server.http.listen-addr=0.0.0.0:12345 /tmp/config.alloy'"
 
 [http_service]
   internal_port = 12345
