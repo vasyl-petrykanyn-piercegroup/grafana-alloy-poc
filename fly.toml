@@ -1,5 +1,5 @@
 app = "grafana-alloy-poc"
-primary_region = "iad"
+primary_region = "arn"
 
 [build]
   image = "grafana/alloy:v1.15.1"
