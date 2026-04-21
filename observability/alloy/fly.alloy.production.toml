@@ -1,0 +1,52 @@
+app = "alloy-production"
+primary_region = "arn"
+
+[build]
+  dockerfile = "observability/alloy/Dockerfile"
+
+[env]
+  ALLOY_APP_NAME = "alloy-production"
+  ENV_NAME = "production"
+  REGION = "arn"
+  SCRAPE_TARGET_DNS = "<replace-with-your-production-app>.internal"
+  SCRAPE_TARGET_APP = "<replace-with-your-production-app>"
+
+[http_service]
+  internal_port = 12345
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 1
+
+[checks]
+  [checks.ready]
+    grace_period = "10s"
+    interval = "30s"
+    method = "GET"
+    path = "/-/ready"
+    port = 12345
+    timeout = "5s"
+    type = "http"
+
+  [checks.healthy]
+    grace_period = "10s"
+    interval = "30s"
+    method = "GET"
+    path = "/-/healthy"
+    port = 12345
+    timeout = "5s"
+    type = "http"
+
+  [checks.metrics]
+    grace_period = "10s"
+    interval = "60s"
+    method = "GET"
+    path = "/metrics"
+    port = 12345
+    timeout = "5s"
+    type = "http"
+
+[[vm]]
+  memory = "256mb"
+  cpu_kind = "shared"
+  cpus = 1

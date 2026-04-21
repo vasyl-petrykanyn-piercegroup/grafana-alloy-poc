@@ -1,0 +1,31 @@
+app = "mvp-metrics-emulator"
+primary_region = "arn"
+
+[build]
+  dockerfile = "metrics-emulator/Dockerfile"
+
+[env]
+  METRICS_PORT = "9464"
+  SERVICE_NAME = "ecom-fe-sveltekit"
+  SERVICE_NAMESPACE = "ecomfe"
+  SERVICE_VERSION = "mvp"
+  DEPLOYMENT_ENVIRONMENT = "preview"
+  CLOUD_PROVIDER = "flyio"
+  CLOUD_REGION = "arn"
+
+[[services]]
+  internal_port = 9464
+  protocol = "tcp"
+
+  [[services.ports]]
+    port = 80
+    handlers = ["http"]
+
+  [[services.ports]]
+    port = 443
+    handlers = ["tls", "http"]
+
+[[vm]]
+  memory = "256mb"
+  cpu_kind = "shared"
+  cpus = 1

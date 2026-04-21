@@ -1,0 +1,11 @@
+{
+  "name": "metrics-emulator",
+  "version": "0.1.0",
+  "private": true,
+  "description": "MVP metrics emulator for Grafana Alloy -> Grafana Cloud tests",
+  "main": "src/server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/server.js"
+  }
+}

@@ -1,0 +1,69 @@
+logging {
+  level  = "info"
+  format = "logfmt"
+}
+
+prometheus.remote_write "grafana_cloud" {
+  endpoint {
+    url = sys.env("PROM_REMOTE_WRITE_URL")
+
+    basic_auth {
+      username = sys.env("PROM_USERNAME")
+      password = sys.env("GRAFANA_CLOUD_API_KEY")
+    }
+  }
+}
+
+prometheus.scrape "alloy_self" {
+  targets    = [{"__address__" = "[::1]:12345"}]
+  forward_to = [prometheus.relabel.alloy_self.receiver]
+}
+
+prometheus.relabel "alloy_self" {
+  forward_to = [prometheus.remote_write.grafana_cloud.receiver]
+
+  rule {
+    target_label = "app"
+    replacement  = sys.env("ALLOY_APP_NAME")
+  }
+
+  rule {
+    target_label = "env"
+    replacement  = sys.env("ENV_NAME")
+  }
+
+  rule {
+    target_label = "region"
+    replacement  = sys.env("REGION")
+  }
+}
+
+discovery.dns "app_target" {
+  names = [sys.env("SCRAPE_TARGET_DNS")]
+  type  = "AAAA"
+  port  = 9464
+}
+
+prometheus.scrape "app_target" {
+  targets    = discovery.dns.app_target.targets
+  forward_to = [prometheus.relabel.app_target.receiver]
+}
+
+prometheus.relabel "app_target" {
+  forward_to = [prometheus.remote_write.grafana_cloud.receiver]
+
+  rule {
+    target_label = "app"
+    replacement  = sys.env("SCRAPE_TARGET_APP")
+  }
+
+  rule {
+    target_label = "env"
+    replacement  = sys.env("ENV_NAME")
+  }
+
+  rule {
+    target_label = "region"
+    replacement  = sys.env("REGION")
+  }
+}
