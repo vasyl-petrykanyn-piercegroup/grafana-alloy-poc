@@ -2,6 +2,17 @@
 
 POC repository to validate observability flow with Grafana Alloy and Grafana Cloud using one Alloy Fly app per environment and a single shared Alloy config.
 
+## Scope
+
+This repository contains implementation experiments only. The canonical
+observability framework and supporting documentation live in
+[`ecom-fe-sveltekit`](https://github.com/24mx/ecom-fe-sveltekit/tree/main/docs/observability),
+including the
+[`Observability Framework`](https://github.com/24mx/ecom-fe-sveltekit/blob/main/docs/specs/observability-framework.md).
+
+Validated configuration from this POC should be migrated to
+`ecom-fe-sveltekit`. Do not add or maintain framework documentation here.
+
 ## Structure
 
 - Shared Alloy files:
