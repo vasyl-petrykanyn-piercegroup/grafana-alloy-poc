@@ -11,7 +11,7 @@ missing_vars=""
 
 for var_name in $required_vars; do
   # Read env var by name and treat empty values as missing.
-  eval "var_value=\${$var_name:-}"
+  var_value="$(printenv "$var_name" 2>/dev/null || true)"
   if [ -z "$var_value" ]; then
     missing_vars="$missing_vars $var_name"
   fi

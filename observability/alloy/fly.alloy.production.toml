@@ -2,7 +2,7 @@ app = "ecom-alloy-production"
 primary_region = "arn"
 
 [build]
-  dockerfile = "Dockerfile"
+  dockerfile = "observability/alloy/Dockerfile"
 
 [env]
   ALLOY_APP_NAME = "ecom-alloy-production"
