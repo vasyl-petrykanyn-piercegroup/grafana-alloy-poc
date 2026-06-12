@@ -7,18 +7,19 @@ POC repository to validate observability flow with Grafana Alloy and Grafana Clo
 - Shared Alloy files:
   - `observability/alloy/Dockerfile`
   - `observability/alloy/config.alloy`
-  - `observability/alloy/fly.alloy.preview.toml`
+  - `observability/alloy/fly.alloy.preproduction.toml`
   - `observability/alloy/fly.alloy.staging.toml`
   - `observability/alloy/fly.alloy.production.toml`
 - Metrics emulator Fly app: `fly.metrics-emulator.toml`
 
 ## What is configured
 
-- Metrics scrape endpoint on separate port `9464`
+- Metrics scrape endpoint on separate port `9091`
 - IPv6 listener for Alloy and metrics-emulator
 - `discovery.dns` (AAAA) + `prometheus.scrape` per env via env vars
-- `prometheus.relabel` for `env`, `app`, `region`
+- `prometheus.relabel` for `env`, `app`
 - `prometheus.remote_write` to Grafana Cloud
+- fail-fast startup check for required secret env vars (`PROM_REMOTE_WRITE_URL`, `PROM_USERNAME`, `GRAFANA_CLOUD_API_KEY`)
 - Alloy self-monitoring via `/metrics`, `/-/ready`, `/-/healthy`
 
 ## Region
@@ -27,7 +28,7 @@ All Fly configs are set to `primary_region = "arn"`.
 
 ## Deploy order
 
-1. Deploy metrics-emulator (preview example):
+1. Deploy metrics-emulator (example):
 
 ```bash
 fly deploy -c fly.metrics-emulator.toml
@@ -36,20 +37,49 @@ fly deploy -c fly.metrics-emulator.toml
 2. Deploy Alloy per env:
 
 ```bash
-fly deploy -c observability/alloy/fly.alloy.preview.toml
+fly deploy -c observability/alloy/fly.alloy.preproduction.toml
 fly deploy -c observability/alloy/fly.alloy.staging.toml
 fly deploy -c observability/alloy/fly.alloy.production.toml
 ```
 
-## Required env-specific values
+## Default scrape targets
 
-Before deploying staging/production, replace these values:
+Configured defaults:
 
-- `SCRAPE_TARGET_DNS` in `observability/alloy/fly.alloy.staging.toml` and `observability/alloy/fly.alloy.production.toml`
-- `SCRAPE_TARGET_APP` in `observability/alloy/fly.alloy.staging.toml` and `observability/alloy/fly.alloy.production.toml`
+- preproduction: `ecom-fe-sveltekit-preproduction`
+- staging: `ecom-fe-sveltekit-staging`
+- production: `ecom-fe-sveltekit-production`
 
 For each Alloy app, set Fly secrets:
 
 - `PROM_REMOTE_WRITE_URL`
 - `PROM_USERNAME`
 - `GRAFANA_CLOUD_API_KEY`
+
+Example (replace placeholder values first):
+
+```bash
+# preproduction
+fly secrets set -a ecom-alloy-preproduction \
+  PROM_REMOTE_WRITE_URL="https://<your-prom-endpoint>/api/prom/push" \
+  PROM_USERNAME="<your-prom-username>" \
+  GRAFANA_CLOUD_API_KEY="<your-grafana-cloud-api-key>"
+
+# staging
+fly secrets set -a ecom-alloy-staging \
+  PROM_REMOTE_WRITE_URL="https://<your-prom-endpoint>/api/prom/push" \
+  PROM_USERNAME="<your-prom-username>" \
+  GRAFANA_CLOUD_API_KEY="<your-grafana-cloud-api-key>"
+
+# production
+fly secrets set -a ecom-alloy-production \
+  PROM_REMOTE_WRITE_URL="https://<your-prom-endpoint>/api/prom/push" \
+  PROM_USERNAME="<your-prom-username>" \
+  GRAFANA_CLOUD_API_KEY="<your-grafana-cloud-api-key>"
+```
+
+Where to get values in Grafana Cloud:
+
+- `PROM_REMOTE_WRITE_URL`: Metrics (Prometheus/Mimir) `Remote write` endpoint URL
+- `PROM_USERNAME`: Metrics instance username
+- `GRAFANA_CLOUD_API_KEY`: API key with `MetricsPublisher` (or equivalent write) permissions

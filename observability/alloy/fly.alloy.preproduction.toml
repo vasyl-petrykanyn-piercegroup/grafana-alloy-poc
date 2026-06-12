@@ -1,22 +1,14 @@
-app = "alloy-preview"
+app = "ecom-alloy-preproduction"
 primary_region = "arn"
 
 [build]
-  dockerfile = "observability/alloy/Dockerfile"
+  dockerfile = "Dockerfile"
 
 [env]
-  ALLOY_APP_NAME = "alloy-preview"
-  ENV_NAME = "preview"
-  REGION = "arn"
-  SCRAPE_TARGET_DNS = "mvp-metrics-emulator.internal"
-  SCRAPE_TARGET_APP = "mvp-metrics-emulator"
-
-[http_service]
-  internal_port = 12345
-  force_https = true
-  auto_stop_machines = "stop"
-  auto_start_machines = true
-  min_machines_running = 1
+  ALLOY_APP_NAME = "ecom-alloy-preproduction"
+  ENV_NAME = "preproduction"
+  SCRAPE_TARGET_DNS = "ecom-fe-sveltekit-preproduction.internal"
+  SCRAPE_TARGET_APP = "ecom-fe-sveltekit-preproduction"
 
 [checks]
   [checks.ready]

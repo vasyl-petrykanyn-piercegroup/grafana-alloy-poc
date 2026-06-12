@@ -5,7 +5,7 @@ primary_region = "arn"
   dockerfile = "metrics-emulator/Dockerfile"
 
 [env]
-  METRICS_PORT = "9464"
+  METRICS_PORT = "9091"
   SERVICE_NAME = "ecom-fe-sveltekit"
   SERVICE_NAMESPACE = "ecomfe"
   SERVICE_VERSION = "mvp"
@@ -14,7 +14,7 @@ primary_region = "arn"
   CLOUD_REGION = "arn"
 
 [[services]]
-  internal_port = 9464
+  internal_port = 9091
   protocol = "tcp"
 
   [[services.ports]]

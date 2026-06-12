@@ -1,6 +1,6 @@
 const http = require('http');
 
-const METRICS_PORT = Number(process.env.METRICS_PORT || process.env.PORT || 9464);
+const METRICS_PORT = Number(process.env.METRICS_PORT || process.env.PORT || 9091);
 
 const RESOURCE_LABELS = {
   service_name: process.env.SERVICE_NAME || 'ecom-fe-sveltekit',
@@ -145,16 +145,11 @@ const httpRequestsTotal = register(
     ...Object.keys(RESOURCE_LABELS),
     'http_request_method',
     'url_scheme',
-    'server_address',
     'route',
     'http_response_status_code',
     'error_type',
-    'tenant',
     'channel',
     'site',
-    'release',
-    'git_sha',
-    'feature_flag',
   ])
 );
 const httpDuration = register(
@@ -322,16 +317,11 @@ function simulate() {
   const httpLabels = {
     http_request_method: method,
     url_scheme: 'https',
-    server_address: 'mvp-metrics-emulator.internal',
     route,
     http_response_status_code: statusCode,
     error_type: errorType,
-    tenant: 'default',
     channel: choose(['web', 'mobile_web']),
     site: choose(['ua', 'eu']),
-    release: `2026.04.${String((tick % 30) + 1).padStart(2, '0')}`,
-    git_sha: `sha${(tick % 9) + 1}`,
-    feature_flag: choose(['checkout_v2_on', 'none']),
   };
 
   httpRequestsTotal.inc(httpLabels, 1);

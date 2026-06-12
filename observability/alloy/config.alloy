@@ -22,6 +22,13 @@ prometheus.scrape "alloy_self" {
 prometheus.relabel "alloy_self" {
   forward_to = [prometheus.remote_write.grafana_cloud.receiver]
 
+  // Keep only metrics needed for Alloy health and remote_write alerting.
+  rule {
+    action        = "keep"
+    source_labels = ["__name__"]
+    regex         = "up|alloy_config_last_load_successful|alloy_config_load_failures_total|alloy_config_last_load_success_timestamp_seconds|prometheus_remote_storage_samples_failed_total|prometheus_remote_storage_samples_pending|prometheus_remote_storage_samples_retried_total|prometheus_remote_storage_enqueue_retries_total|prometheus_remote_storage_queue_highest_sent_timestamp_seconds|prometheus_remote_storage_queue_highest_timestamp_seconds"
+  }
+
   rule {
     target_label = "app"
     replacement  = sys.env("ALLOY_APP_NAME")
@@ -36,12 +43,27 @@ prometheus.relabel "alloy_self" {
     target_label = "region"
     replacement  = sys.env("REGION")
   }
+
+  // Use a stable fallback when REGION is not set.
+  rule {
+    action        = "replace"
+    source_labels = ["region"]
+    regex         = "^$"
+    target_label  = "region"
+    replacement   = "arn"
+  }
+
+  // Drop noisy infrastructure labels we don't need for alert routing.
+  rule {
+    action = "labeldrop"
+    regex  = "component_path|remote_name|url"
+  }
 }
 
 discovery.dns "app_target" {
   names = [sys.env("SCRAPE_TARGET_DNS")]
   type  = "AAAA"
-  port  = 9464
+  port  = 9091
 }
 
 prometheus.scrape "app_target" {
@@ -51,6 +73,13 @@ prometheus.scrape "app_target" {
 
 prometheus.relabel "app_target" {
   forward_to = [prometheus.remote_write.grafana_cloud.receiver]
+
+  // Allowlist app metrics namespaces and scrape health only.
+  rule {
+    action        = "keep"
+    source_labels = ["__name__"]
+    regex         = "up|ecomfe_.*|nodejs_.*|process_.*"
+  }
 
   rule {
     target_label = "app"
@@ -65,5 +94,19 @@ prometheus.relabel "app_target" {
   rule {
     target_label = "region"
     replacement  = sys.env("REGION")
+  }
+
+  // Use a stable fallback when REGION is not set.
+  rule {
+    action        = "replace"
+    source_labels = ["region"]
+    regex         = "^$"
+    target_label  = "region"
+    replacement   = "arn"
+  }
+
+  rule {
+    action = "labeldrop"
+    regex  = "tenant|release|git_sha|feature_flag|server_address|url|domain"
   }
 }

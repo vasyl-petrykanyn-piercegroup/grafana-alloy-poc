@@ -11,8 +11,8 @@ cd metrics-emulator
 npm start
 ```
 
-- health: `http://localhost:8080/healthz`
-- metrics: `http://localhost:8080/metrics`
+- health: `http://localhost:9091/healthz`
+- metrics: `http://localhost:9091/metrics`
 
 ## Deploy on Fly.io
 
@@ -24,7 +24,7 @@ fly deploy -c fly.metrics-emulator.toml
 
 This deploy uses internal hostname:
 
-`mvp-metrics-emulator.internal:8080`
+`mvp-metrics-emulator.internal:9091`
 
 ## Included metric domains
 

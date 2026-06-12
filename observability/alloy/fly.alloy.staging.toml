@@ -1,22 +1,14 @@
-app = "alloy-staging"
+app = "ecom-alloy-staging"
 primary_region = "arn"
 
 [build]
-  dockerfile = "observability/alloy/Dockerfile"
+  dockerfile = "Dockerfile"
 
 [env]
-  ALLOY_APP_NAME = "alloy-staging"
+  ALLOY_APP_NAME = "ecom-alloy-staging"
   ENV_NAME = "staging"
-  REGION = "arn"
-  SCRAPE_TARGET_DNS = "<replace-with-your-staging-app>.internal"
-  SCRAPE_TARGET_APP = "<replace-with-your-staging-app>"
-
-[http_service]
-  internal_port = 12345
-  force_https = true
-  auto_stop_machines = "stop"
-  auto_start_machines = true
-  min_machines_running = 1
+  SCRAPE_TARGET_DNS = "ecom-fe-sveltekit-staging.internal"
+  SCRAPE_TARGET_APP = "ecom-fe-sveltekit-staging"
 
 [checks]
   [checks.ready]

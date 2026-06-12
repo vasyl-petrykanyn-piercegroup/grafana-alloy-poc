@@ -1,8 +1,8 @@
 FROM node:20-alpine
 
 WORKDIR /app
-COPY package.json ./
-COPY src ./src
+COPY metrics-emulator/package.json ./package.json
+COPY metrics-emulator/src ./src
 
-EXPOSE 8080
+EXPOSE 9091
 CMD ["npm", "start"]
