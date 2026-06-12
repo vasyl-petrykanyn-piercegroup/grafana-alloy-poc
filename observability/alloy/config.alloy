@@ -40,16 +40,16 @@ prometheus.relabel "alloy_self" {
   }
 
   rule {
-    target_label = "cloud_region"
+    target_label = "region"
     replacement  = sys.env("REGION")
   }
 
   // Use a stable fallback when REGION is not set.
   rule {
     action        = "replace"
-    source_labels = ["cloud_region"]
+    source_labels = ["region"]
     regex         = "^$"
-    target_label  = "cloud_region"
+    target_label  = "region"
     replacement   = "arn"
   }
 
@@ -92,21 +92,21 @@ prometheus.relabel "app_target" {
   }
 
   rule {
-    target_label = "cloud_region"
+    target_label = "region"
     replacement  = sys.env("REGION")
   }
 
   // Use a stable fallback when REGION is not set.
   rule {
     action        = "replace"
-    source_labels = ["cloud_region"]
+    source_labels = ["region"]
     regex         = "^$"
-    target_label  = "cloud_region"
+    target_label  = "region"
     replacement   = "arn"
   }
 
   rule {
     action = "labeldrop"
-    regex  = "tenant|server_address|url|domain"
+    regex  = "tenant|release|git_sha|feature_flag|server_address|url|domain"
   }
 }
