@@ -1,0 +1,44 @@
+app = "ecom-alloy-preproduction"
+primary_region = "arn"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  ALLOY_APP_NAME = "ecom-alloy-preproduction"
+  ENV_NAME = "preproduction"
+  SCRAPE_TARGET_DNS = "ecom-fe-sveltekit-preproduction.internal"
+  SCRAPE_TARGET_APP = "ecom-fe-sveltekit-preproduction"
+
+[checks]
+  [checks.ready]
+    grace_period = "10s"
+    interval = "30s"
+    method = "GET"
+    path = "/-/ready"
+    port = 12345
+    timeout = "5s"
+    type = "http"
+
+  [checks.healthy]
+    grace_period = "10s"
+    interval = "30s"
+    method = "GET"
+    path = "/-/healthy"
+    port = 12345
+    timeout = "5s"
+    type = "http"
+
+  [checks.metrics]
+    grace_period = "10s"
+    interval = "60s"
+    method = "GET"
+    path = "/metrics"
+    port = 12345
+    timeout = "5s"
+    type = "http"
+
+[[vm]]
+  memory = "256mb"
+  cpu_kind = "shared"
+  cpus = 1

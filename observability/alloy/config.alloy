@@ -1,0 +1,112 @@
+logging {
+  level  = "info"
+  format = "logfmt"
+}
+
+prometheus.remote_write "grafana_cloud" {
+  endpoint {
+    url = sys.env("PROM_REMOTE_WRITE_URL")
+
+    basic_auth {
+      username = sys.env("PROM_USERNAME")
+      password = sys.env("GRAFANA_CLOUD_API_KEY")
+    }
+  }
+}
+
+prometheus.scrape "alloy_self" {
+  targets    = [{"__address__" = "[::1]:12345"}]
+  forward_to = [prometheus.relabel.alloy_self.receiver]
+}
+
+prometheus.relabel "alloy_self" {
+  forward_to = [prometheus.remote_write.grafana_cloud.receiver]
+
+  // Keep only metrics needed for Alloy health and remote_write alerting.
+  rule {
+    action        = "keep"
+    source_labels = ["__name__"]
+    regex         = "up|alloy_config_last_load_successful|alloy_config_load_failures_total|alloy_config_last_load_success_timestamp_seconds|prometheus_remote_storage_samples_failed_total|prometheus_remote_storage_samples_pending|prometheus_remote_storage_samples_retried_total|prometheus_remote_storage_enqueue_retries_total|prometheus_remote_storage_queue_highest_sent_timestamp_seconds|prometheus_remote_storage_queue_highest_timestamp_seconds"
+  }
+
+  rule {
+    target_label = "app"
+    replacement  = sys.env("ALLOY_APP_NAME")
+  }
+
+  rule {
+    target_label = "env"
+    replacement  = sys.env("ENV_NAME")
+  }
+
+  rule {
+    target_label = "region"
+    replacement  = sys.env("REGION")
+  }
+
+  // Use a stable fallback when REGION is not set.
+  rule {
+    action        = "replace"
+    source_labels = ["region"]
+    regex         = "^$"
+    target_label  = "region"
+    replacement   = "arn"
+  }
+
+  // Drop noisy infrastructure labels we don't need for alert routing.
+  rule {
+    action = "labeldrop"
+    regex  = "component_path|remote_name|url"
+  }
+}
+
+discovery.dns "app_target" {
+  names = [sys.env("SCRAPE_TARGET_DNS")]
+  type  = "AAAA"
+  port  = 9091
+}
+
+prometheus.scrape "app_target" {
+  targets    = discovery.dns.app_target.targets
+  forward_to = [prometheus.relabel.app_target.receiver]
+}
+
+prometheus.relabel "app_target" {
+  forward_to = [prometheus.remote_write.grafana_cloud.receiver]
+
+  // Allowlist app metrics namespaces and scrape health only.
+  rule {
+    action        = "keep"
+    source_labels = ["__name__"]
+    regex         = "up|ecomfe_.*|nodejs_.*|process_.*"
+  }
+
+  rule {
+    target_label = "app"
+    replacement  = sys.env("SCRAPE_TARGET_APP")
+  }
+
+  rule {
+    target_label = "env"
+    replacement  = sys.env("ENV_NAME")
+  }
+
+  rule {
+    target_label = "region"
+    replacement  = sys.env("REGION")
+  }
+
+  // Use a stable fallback when REGION is not set.
+  rule {
+    action        = "replace"
+    source_labels = ["region"]
+    regex         = "^$"
+    target_label  = "region"
+    replacement   = "arn"
+  }
+
+  rule {
+    action = "labeldrop"
+    regex  = "tenant|release|git_sha|feature_flag|server_address|url|domain"
+  }
+}
